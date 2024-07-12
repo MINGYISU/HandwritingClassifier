@@ -38,7 +38,7 @@ bigFONT = pygame.font.Font(FontPath, 80)
 
 # Create the screen object
 screen = pygame.display.set_mode(size)
-background_image = pygame.image.load("src_image/background.jpg")
+background_image = pygame.image.load("src_image/background.png")
 background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
 pygame.display.set_caption("Handwriting Classifier")
 
