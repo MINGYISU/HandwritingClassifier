@@ -32,7 +32,7 @@ size = WIDTH, HEIGHT
 
 # Create the screen object
 screen = pygame.display.set_mode(size)
-background_image = pygame.image.load("src_image/background.png")
+background_image = pygame.image.load("src_image/background.jpg")
 background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
 pygame.display.set_caption("Handwriting Classifier")
 
@@ -43,7 +43,6 @@ ROW, COL = 28, 28
 CELL = 20
 OFFSET_W = (WIDTH - ROW * CELL) / 4
 OFFSET_H = (HEIGHT - COL * CELL) / 2
-
 
 # Create the drawing board
 drawboard = [[0] * COL for _ in range(ROW)]
@@ -79,9 +78,9 @@ while running:
                 CELL, CELL
             )
 
-            # Darken the grey cell
+            # Darken the grey cell if this cell has been written on
             if drawboard[i][j]:
-                channel = 255 - (handwriting[i][j] * 255)
+                channel = 255 - (drawboard[i][j] * 255)
                 pygame.draw.rect(screen, (channel, channel, channel), rect)
             # Draw a blank cell
             else:
@@ -90,7 +89,17 @@ while running:
             # Draw boarders of the cells
             pygame.draw.rect(screen, BLACK, rect, 1)
 
-            
+            # If the user clicks on this cell, darken it and its neighbours
+            if mouse and rect.collidepoint(mouse):
+                # The cell itself
+                drawboard[i][j] = 250 / 255
+                # Neighbours
+                if i + 1 < ROW:
+                    drawboard[i + 1][j] = 220 / 255
+                if j + 1 < COL:
+                    drawboard[i][j + 1] = 220 / 255
+                if i + 1 < ROW and j + 1 < COL:
+                    drawboard[i + 1][j + 1] = 190 / 255
 
             
 
