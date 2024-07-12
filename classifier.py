@@ -18,17 +18,23 @@ from pygame.locals import (
 # define colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
+RED = (255, 71, 77)
+GREEN = (144, 228, 144)
 BLUE = (0, 0, 255)
+YELLOW = (255, 255, 0)
 
 # Initialize pygame
 pygame.init()
 
 # Define screen width and height
 WIDTH = 1000
-HEIGHT = 750
+HEIGHT = WIDTH * 0.618
 size = WIDTH, HEIGHT
+
+# Fonts
+FontPath = "fonts/PartyLET-plain.ttf"
+FONT = pygame.font.Font(FontPath, 30)
+bigFONT = pygame.font.Font(FontPath, 80)
 
 # Create the screen object
 screen = pygame.display.set_mode(size)
@@ -46,7 +52,7 @@ OFFSET_H = (HEIGHT - COL * CELL) / 2
 
 # Create the drawing board
 drawboard = [[0] * COL for _ in range(ROW)]
-
+classification = None
 
 running = True
 
@@ -68,7 +74,7 @@ while running:
     mouse = None
     if click == 1:
         mouse = pygame.mouse.get_pos()
-
+    
     # Draw the cells
     for i in range(ROW):
         for j in range(COL):
@@ -100,8 +106,57 @@ while running:
                     drawboard[i][j + 1] = 220 / 255
                 if i + 1 < ROW and j + 1 < COL:
                     drawboard[i + 1][j + 1] = 190 / 255
+    
+    BUTTON_OFFSET_W =  OFFSET_W + ROW * CELL + 30
+    BUTTON_W = 180
+    BUTTON_H = BUTTON_W * 0.618
+    # Draw reset button
+    ResetButton = pygame.Rect(
+        BUTTON_OFFSET_W, OFFSET_H, 
+        BUTTON_W, BUTTON_H
+    )
+    ResetText = FONT.render("RESET", True, WHITE)
+    ResetTextRect = ResetText.get_rect()
+    ResetTextRect.center = ResetButton.center
+    pygame.draw.rect(screen, RED, ResetButton)
+    screen.blit(ResetText, ResetTextRect)
 
-            
+    # Draw classifier button
+    ClassButton = pygame.Rect(
+        BUTTON_OFFSET_W, OFFSET_H + 170, 
+        BUTTON_W, BUTTON_H
+    )
+    ClassText = FONT.render("CLASSIFY", True, WHITE)
+    ClassTextRect = ClassText.get_rect()
+    ClassTextRect.center = ClassButton.center
+    pygame.draw.rect(screen, GREEN, ClassButton)
+    screen.blit(ClassText, ClassTextRect)
+
+    # Display area
+    Display = pygame.Rect(
+        BUTTON_OFFSET_W, OFFSET_H + 300, 
+        BUTTON_W, BUTTON_H + 150
+    )
+    pygame.draw.rect(screen, WHITE, Display)
+
+    # Reset the drawing if the reset button is clicked
+    if mouse and ResetButton.collidepoint(mouse):
+        drawboard = [[0] * COL for _ in range(ROW)]
+        # Reset classification
+        classification = None
+
+    # Generate a classification if the class button is clicked
+    if mouse and ClassButton.collidepoint(mouse):
+        classification = model.predict(
+            [np.array(drawboard).reshape(1, 28, 28, 1)]
+        ).argmax()
+
+    # Show classification if generated
+    if classification is not None:
+        classificationText = bigFONT.render(str(classification), True, BLACK)
+        classificationRect = classificationText.get_rect()
+        classificationRect.center = Display.center
+        screen.blit(classificationText, classificationRect)
 
     pygame.display.flip()
 
